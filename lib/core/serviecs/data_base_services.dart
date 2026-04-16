@@ -5,7 +5,14 @@ abstract class DataBaseServices {
     String? documentID,
   });
 
-  Future<dynamic> readData({
+  // Future<dynamic> readData({
+  //   String? documentID,
+  //   required String path,
+  //   Map<String, dynamic>? query,
+ 
+  // });
+
+   Stream<dynamic> readStreamData({
     String? documentID,
     required String path,
     Map<String, dynamic>? query,

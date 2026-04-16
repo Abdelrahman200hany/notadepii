@@ -41,22 +41,21 @@ class NoteRepoImpt extends NoteRepo {
   }
 
   @override
-  Future<Either<Fauilre, List<NoteEntity>>> getAllNotes() async {
+  Stream<Either<Fauilre, List<NoteEntity>>> getAllNotes() {
     try {
-      var result =
-          await dataBaseServices.readData(path: path)
-              as List<Map<String, dynamic>>;
-      // if (result == null || result.isEmpty) {
-      //   return right([]);
-      // }
+      return dataBaseServices.readStreamData(path: path).map((event) {
+        final result = event as List<Map<String, dynamic>>;
 
-      List<NoteEntity> notes = result
-          .map((e) => NoteModel.fromJson(e).toEntity())
-          .toList();
+        final notes = result
+            .map((e) => NoteModel.fromJson(e).toEntity())
+            .toList();
 
-      return right(notes);
+        return right(notes);
+      });
     } catch (e) {
-      return left(ServerFailure(errorMessage: 'faild to get notes '));
+      return Stream.value(
+        left(ServerFailure(errorMessage: 'failed to get notes')),
+      );
     }
   }
 

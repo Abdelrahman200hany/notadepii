@@ -17,33 +17,67 @@ class FireBaseStorageServices implements DataBaseServices {
     }
   }
 
+  // @override
+  // Future readData({
+  //   String? documentID,
+  //   required String path,
+  //   Map<String, dynamic>? query,
+  // }) async {
+  //   if (documentID != null) {
+  //     var data = await firestore.collection(path).doc(documentID).get();
+  //     return data.data() as Map<String, dynamic>;
+  //   } else {
+  //     CollectionReference<Map<String, dynamic>> data = firestore.collection(
+  //       path,
+  //     );
+
+  //     if (query != null) {
+  //       if (query['orderBy'] != null) {
+  //         var orderByFeild = query['orderBy'];
+  //         bool descending = query['descending'];
+  //         data.orderBy(orderByFeild, descending: descending);
+  //       }
+  //       if (query['limit'] != null) {
+  //         int limit = query['limit'];
+  //         data.limit(limit);
+  //       }
+  //     }
+  //     var result = await data.get();
+  //     return result.docs.map((e) => e.data()).toList();
+  //   }
+  // }
+
   @override
-  Future readData({
+  Stream readStreamData({
     String? documentID,
     required String path,
     Map<String, dynamic>? query,
-  }) async {
+  }) {
     if (documentID != null) {
-      var data = await firestore.collection(path).doc(documentID).get();
-      return data.data() as Map<String, dynamic>;
+      return firestore
+          .collection(path)
+          .doc(documentID)
+          .snapshots()
+          .map((doc) => doc.data());
     } else {
-      CollectionReference<Map<String, dynamic>> data = firestore.collection(
-        path,
-      );
+      Query<Map<String, dynamic>> data = firestore.collection(path);
 
       if (query != null) {
         if (query['orderBy'] != null) {
-          var orderByFeild = query['orderBy'];
-          bool descending = query['descending'];
-          data.orderBy(orderByFeild, descending: descending);
+          data = data.orderBy(
+            query['orderBy'],
+            descending: query['descending'] ?? false,
+          );
         }
+
         if (query['limit'] != null) {
-          int limit = query['limit'];
-          data.limit(limit);
+          data = data.limit(query['limit']);
         }
       }
-      var result = await data.get();
-      return result.docs.map((e) => e.data()).toList();
+
+      return data.snapshots().map(
+        (snapshot) => snapshot.docs.map((e) => e.data()).toList(),
+      );
     }
   }
 

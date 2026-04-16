@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:nota/feature/note/domain/entity/note_entity.dart';
@@ -7,25 +9,47 @@ part 'note_state.dart';
 
 class NoteCubit extends Cubit<NoteState> {
   NoteCubit(this.noteRepo) : super(NoteInitial());
+  @override
+  Future<void> close() {
+    _notesSub?.cancel();
+    return super.close();
+  }
 
   final NoteRepo noteRepo;
   List<NoteEntity> notesList = [];
+  StreamSubscription? _notesSub;
 
-  ///  Get All Notes
-  Future<void> getAllNotes() async {
+  void getAllNotes() {
+    _notesSub?.cancel();
+
     emit(NoteLoading());
 
-    final result = await noteRepo.getAllNotes();
-
-    result.fold(
-      (failure) => emit(NoteFaulire(errorMessage: failure.errorMessage)),
-      (notes) {
-        notesList = notes;
-
-        emit(NoteGetSuccess(notes: notes));
-      },
-    );
+    _notesSub = noteRepo.getAllNotes().listen((result) {
+      result.fold(
+        (failure) => emit(NoteFaulire(errorMessage: failure.errorMessage)),
+        (notes) {
+          notesList = notes;
+          emit(NoteGetSuccess(notes: notes));
+        },
+      );
+    });
   }
+
+  ///  Get All Notes for not stream data
+  // Future<void> getAllNotes() async {
+  //   emit(NoteLoading());
+
+  //   final result = await noteRepo.getAllNotes();
+
+  //   result.fold(
+  //     (failure) => emit(NoteFaulire(errorMessage: failure.errorMessage)),
+  //     (notes) {
+  //       notesList = notes;
+
+  //       emit(NoteGetSuccess(notes: notes));
+  //     },
+  //   );
+  // }
 
   /// Add Note
   Future<void> addNote({required NoteEntity note}) async {
@@ -47,9 +71,7 @@ class NoteCubit extends Cubit<NoteState> {
 
     result.fold(
       (failure) => emit(NoteFaulire(errorMessage: failure.errorMessage)),
-      (_) async {
-        await getAllNotes();
-      },
+      (_) => emit(NoteDeleted()),
     );
   }
 
