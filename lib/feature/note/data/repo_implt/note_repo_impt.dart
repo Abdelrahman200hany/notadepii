@@ -43,12 +43,14 @@ class NoteRepoImpt extends NoteRepo {
   @override
   Future<Either<Fauilre, List<NoteEntity>>> getAllNotes() async {
     try {
-      final result = await dataBaseServices.readData(path: path);
-      if (result == null || result.isEmpty) {
-        return right([]); 
-      }
+      var result =
+          await dataBaseServices.readData(path: path)
+              as List<Map<String, dynamic>>;
+      // if (result == null || result.isEmpty) {
+      //   return right([]);
+      // }
 
-      final notes = result
+      List<NoteEntity> notes = result
           .map((e) => NoteModel.fromJson(e).toEntity())
           .toList();
 
@@ -64,7 +66,7 @@ class NoteRepoImpt extends NoteRepo {
     required NoteEntity note,
   }) async {
     try {
-      final model = NoteModel.fromEntity(note);
+      var model = NoteModel.fromEntity(note);
 
       await dataBaseServices.upDateData(
         path: path,

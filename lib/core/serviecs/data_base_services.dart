@@ -8,7 +8,8 @@ abstract class DataBaseServices {
   Future<dynamic> readData({
     String? documentID,
     required String path,
-  
+    Map<String, dynamic>? query,
+ 
   });
   Future<void> deleteData({required String documentID, required String path});
   Future<void> upDateData({
