@@ -72,6 +72,9 @@ class _AddNewNoteViewBodyState extends State<AddNewNoteViewBody> {
                     }
                   },
                 ),
+
+                SizedBox(height: 12,),
+                CustomTextBottomWithBackground(text: 'throw ex ',ontap: ()=>throw Exception(),)
               ],
             ),
           ),
